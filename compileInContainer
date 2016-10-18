@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+original_user=${USER}
+original_group=$(groups | awk '{print $1}')
+
+CONTAINER_ID=$(sudo docker ps -a | awk 'NR==2 {print $1}')
+
+# Prepare workspace 
+sudo docker exec ${CONTAINER_ID} mkdir -p /tmp/boost_1_62_0/libs/fiber/examples/ferenc
+
+# Copy sources
+sudo docker cp simple.cpp ${CONTAINER_ID}:/tmp/boost_1_62_0/libs/fiber/examples/ferenc/modified_simple.cpp
+
+# Preapre for building
+sudo docker exec ${CONTAINER_ID}  bash -c  'echo "exe ferenc/modified_simple : ferenc/modified_simple.cpp ;" >> /tmp/boost_1_62_0/libs/fiber/examples/Jamfile.v2'
+
+# Build
+sudo docker exec ${CONTAINER_ID}  bash -c 'cd /tmp/boost_1_62_0/libs/fiber/examples/ && /tmp/boost_1_62_0/b2 -j12 toolset=gcc cxxflags="-std=c++14" address-model=64 release'
+
+# Retrieve result
+sudo docker cp ${CONTAINER_ID}:/tmp/boost_1_62_0/bin.v2/libs/fiber/examples/gcc-6/release/link-static/threading-multi/ferenc/modified_simple .
+sudo chown ${original_user} modified_simple
+sudo chgrp ${original_group} modified_simple
+
+# Cleanup workspace and result directory
+sudo docker exec ${CONTAINER_ID}  sed -i '46d' /tmp/boost_1_62_0/libs/fiber/examples/Jamfile.v2
+#sudo docker exec ${CONTAINER_ID}  rm -rf /tmp/boost_1_62_0/bin.v2/libs/fiber/examples/gcc-6/release/link-static/threading-multi/ferenc/
+sudo docker exec ${CONTAINER_ID}  rm -rf /tmp/boost_1_62_0/libs/fiber/examples/ferenc
