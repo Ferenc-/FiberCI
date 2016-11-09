@@ -1,0 +1,1 @@
+g++-6 -std=c++14 -fsplit-stack -DBOOST_USE_SEGMENTED_STACKS -lpthread -lboost_context -lboost_coroutine -lboost_thread -lboost_fiber simple.cpp
