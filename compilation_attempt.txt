@@ -1,1 +1,8 @@
+# If you are lucky enough to have boost context compiled for c++14
+# http://boost.2283326.n4.nabble.com/Coroutine2-examples-Cannot-link-properly-td4684960.html
 g++-6 -std=c++14 -fsplit-stack -DBOOST_USE_SEGMENTED_STACKS -lpthread -lboost_context -lboost_coroutine -lboost_thread -lboost_fiber simple.cpp
+
+# Else you need properly compiled static library from boost context
+# and link it statically
+g++-6 -c -std=c++14 -fsplit-stack simple.cpp
+g++-6 simple.o libboost_context.a -lpthread -lboost_context -lboost_coroutine -lboost_thread -lboost_fiber
