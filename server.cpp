@@ -22,12 +22,12 @@ using socket_ptr = boost::shared_ptr<tcp::socket>;
 
 void session(socket_ptr socket) {
     try {
-        for (;;) {
+        for (;;) { // Infinite read loop
             const unsigned max_length = 1024U;
             char data[max_length];
             boost::system::error_code ec;
             std::size_t length = socket->async_read_some(
-                    boost::asio::buffer( data),
+                    boost::asio::buffer(data),
                     boost::fibers::asio::yield[ec]);
             if (ec == boost::asio::error::eof) {
                 break; //connection closed cleanly by peer
@@ -39,7 +39,7 @@ void session(socket_ptr socket) {
 
             boost::asio::async_write(
                     * socket,
-                    boost::asio::buffer( data, length),
+                    boost::asio::buffer(data, length),
                     boost::fibers::asio::yield[ec]);
 
             if (ec == boost::asio::error::eof) {
